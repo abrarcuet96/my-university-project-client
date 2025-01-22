@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Button, Row } from "antd";
 import { FieldValues } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -58,7 +59,7 @@ const Login = () => {
       });
       navigate(`/${user.userRole}/dashboard`);
     } catch (error) {
-      toast.error(`Something went wrong: ${error}`, {
+      toast.error(`Something went wrong`, {
         id: toastId,
         duration: 2000,
       });

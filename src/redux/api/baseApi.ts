@@ -7,6 +7,7 @@ import {
   createApi,
   fetchBaseQuery,
 } from "@reduxjs/toolkit/query/react";
+import { toast } from "sonner";
 import { logout, setUser } from "../features/auth/authSlice";
 import { RootState } from "../store";
 
@@ -30,11 +31,18 @@ const baseQueryWithRefreshToken: BaseQueryFn<
   DefinitionType
 > = async (args, api, extraOptions): Promise<any> => {
   let result = await baseQuery(args, api, extraOptions);
-
+  if (result?.error?.status === 404) {
+    toast.error(result?.error?.data?.message, {
+      style: {
+        padding: "16px",
+        borderRadius: "8px",
+        fontSize: "16px",
+        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+      },
+      className: "class",
+    });
+  }
   if (result?.error?.status === 401) {
-    //* Send Refresh
-    console.log("Sending refresh token");
-
     const res = await fetch("http://localhost:5000/api/v1/auth/refresh-token", {
       method: "POST",
       credentials: "include",
@@ -52,7 +60,7 @@ const baseQueryWithRefreshToken: BaseQueryFn<
           token: data.data.accessToken,
         })
       );
-      
+
       result = await baseQuery(args, api, extraOptions);
     } else {
       api.dispatch(logout());

@@ -12,7 +12,7 @@ const MainLayout = () => {
   };
   return (
     <div>
-      <Layout style={{ height: "100vh" }}>
+      <Layout>
         <Sidebar></Sidebar>
         <Layout>
           <Header style={{ padding: 0 }}>
