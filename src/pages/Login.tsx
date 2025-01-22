@@ -1,7 +1,9 @@
-import { Button } from "antd";
-import { FieldValues, useForm } from "react-hook-form";
+import { Button, Row } from "antd";
+import { FieldValues } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import AHFrom from "../components/form/AHForm";
+import AHInput from "../components/form/AHInput";
 import { useLoginMutation } from "../redux/features/auth/authApi";
 import { setUser, TUser } from "../redux/features/auth/authSlice";
 import { useAppDispatch } from "../redux/hooks";
@@ -10,12 +12,16 @@ import { verifyToken } from "../utils/verifyToken";
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { register, handleSubmit } = useForm({
-    defaultValues: {
-      id: "A-0001",
-      password: "admin123",
-    },
-  });
+  // const { register, handleSubmit } = useForm({
+  //   defaultValues: {
+  //     id: "A-0001",
+  //     password: "admin123",
+  //   },
+  // });
+  const defaultValues = {
+    id: "A-0001",
+    password: "admin123",
+  };
   const [login] = useLoginMutation();
 
   const onSubmit = async (data: FieldValues) => {
@@ -39,7 +45,6 @@ const Login = () => {
       console.log(user);
 
       dispatch(setUser({ user: user, token: res.data.accessToken }));
-      navigate(`/${user.userRole}/dashboard`);
       toast.success("Logged in successfully!", {
         id: toastId,
         duration: 2000,
@@ -51,6 +56,7 @@ const Login = () => {
         },
         className: "class",
       });
+      navigate(`/${user.userRole}/dashboard`);
     } catch (error) {
       toast.error(`Something went wrong: ${error}`, {
         id: toastId,
@@ -59,17 +65,45 @@ const Login = () => {
     }
   };
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div>
-        <label htmlFor="id">ID:</label>
-        <input type="text" id="id" {...register("id")} />
+    <Row
+      justify="center"
+      align="middle"
+      style={{
+        height: "100vh",
+      }}
+    >
+      <div
+        style={{
+          padding: "2rem",
+          width: "100%",
+          maxWidth: "400px",
+          background: "#fff",
+          borderRadius: "10px",
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+        }}
+      >
+        <h2 style={{ textAlign: "center", marginBottom: "1.5rem" }}>Login</h2>
+        <AHFrom onSubmit={onSubmit} defaultValues={defaultValues}>
+          <AHInput type="text" name="id" label="ID:" />
+          <AHInput type="password" name="password" label="Password:" />
+          <Button
+            htmlType="submit"
+            type="primary"
+            style={{
+              padding: "0.8rem",
+              borderRadius: "5px",
+              fontWeight: "bold",
+              background: "#0E86D4",
+              border: "none",
+              cursor: "pointer",
+              transition: "background 0.3s",
+            }}
+          >
+            Login
+          </Button>
+        </AHFrom>
       </div>
-      <div>
-        <label htmlFor="password">Password:</label>
-        <input type="text" id="password" {...register("password")} />
-      </div>
-      <Button htmlType="submit">Login</Button>
-    </form>
+    </Row>
   );
 };
 export default Login;
