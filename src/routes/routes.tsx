@@ -1,5 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
+import ProtectedRoute from "../components/layout/ProtectedRoute";
+import ChangePassword from "../pages/ChangePassword";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import { routeGenerator } from "../utils/routesGenerator";
@@ -14,22 +16,38 @@ const router = createBrowserRouter([
   },
   {
     path: "/admin",
-    element: <App></App>,
+    element: (
+      <ProtectedRoute role="admin">
+        <App></App>
+      </ProtectedRoute>
+    ),
     children: routeGenerator(adminPaths),
   },
   {
     path: "/faculty",
-    element: <App></App>,
+    element: (
+      <ProtectedRoute role="faculty">
+        <App></App>
+      </ProtectedRoute>
+    ),
     children: routeGenerator(facultyPaths),
   },
   {
     path: "/student",
-    element: <App></App>,
+    element: (
+      <ProtectedRoute role="student">
+        <App></App>
+      </ProtectedRoute>
+    ),
     children: routeGenerator(studentPaths),
   },
   {
     path: "/login",
     element: <Login></Login>,
+  },
+  {
+    path: "/change-password",
+    element: <ChangePassword />,
   },
   {
     path: "/register",

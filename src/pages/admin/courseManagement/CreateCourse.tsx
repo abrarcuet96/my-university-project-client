@@ -4,25 +4,20 @@ import { FieldValues, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 import AHFrom from "../../../components/form/AHForm";
 import AHInput from "../../../components/form/AHInput";
-import AHSelect, { TOptions } from "../../../components/form/AHSelect";
+import AHSelect from "../../../components/form/AHSelect";
 import {
-  useAddAcademicDepartmentMutation,
-  useGetAllAcademicFacultiesQuery,
-} from "../../../redux/features/admin/academicManagement.api";
+  useAddCourseMutation,
+  useGetAllCoursesQuery,
+} from "../../../redux/features/admin/courseManagement.api";
 import { TResponse } from "../../../types";
-import { TAcademicDepartment } from "../../../types/academicManagement.type";
 
-type TResponseData = Pick<TAcademicDepartment, "name" | "academicFaculty">;
-
-const CreateAcademicDepartment = () => {
-  const [addAcademicDepartment] = useAddAcademicDepartmentMutation();
-  const { data: facultyData, isLoading } =
-    useGetAllAcademicFacultiesQuery(undefined);
-
-  const facultyOptions = facultyData?.data?.map((item) => ({
+const CreateCourse = () => {
+  const [addCourse] = useAddCourseMutation();
+  const { data: courses } = useGetAllCoursesQuery(undefined);
+  const preRequisiteCoursesrOptions = courses?.data?.map((item) => ({
     value: item._id,
-    label: item.name,
-  })) as TOptions[];
+    label: item.title,
+  }));
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     const toastId = toast.loading("Creating...", {
@@ -34,11 +29,23 @@ const CreateAcademicDepartment = () => {
       },
       className: "class",
     });
+    const courseData = {
+      ...data,
+      code: Number(data.code),
+      credits: Number(data.credits),
+      isDeleted: false,
+      preRequisiteCourses: data?.preRequisiteCourses
+        ? data?.preRequisiteCourses.map((item) => ({
+            course: item,
+            isDeleted: false,
+          }))
+        : [],
+    };
+    console.log(courseData);
 
     try {
-      const res = (await addAcademicDepartment(
-        data
-      )) as TResponse<TResponseData>;
+      const res = (await addCourse(courseData)) as TResponse<any>;
+      console.log(res);
       if (res.error) {
         toast.error(res?.error?.data?.message, {
           id: toastId,
@@ -51,7 +58,7 @@ const CreateAcademicDepartment = () => {
           className: "class",
         });
       } else {
-        toast.success("Department created", {
+        toast.success(res?.data?.message, {
           id: toastId,
           style: {
             padding: "16px",
@@ -75,27 +82,25 @@ const CreateAcademicDepartment = () => {
       });
     }
   };
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
+
   return (
     <Flex justify="center" align="center">
       <Col span={6}>
-        <AHFrom
-          onSubmit={onSubmit}
-          // resolver={zodResolver(academicSemesterSchema)}
-        >
-          <AHInput type="text" name="name" label="Academic Department Name:" />
+        <AHFrom onSubmit={onSubmit}>
+          <AHInput type="text" name="title" label="Title" />
+          <AHInput type="text" name="prefix" label="Prefix" />
+          <AHInput type="text" name="code" label="Code" />
+          <AHInput type="text" name="credits" label="Credits" />
           <AHSelect
-            label="Academic Faculty:"
-            name="academicFaculty"
-            options={facultyOptions}
+            mode="multiple"
+            options={preRequisiteCoursesrOptions}
+            name="preRequisiteCourses"
+            label="Pre-requisite Courses"
           />
-
           <Button htmlType="submit">Submit</Button>
         </AHFrom>
       </Col>
     </Flex>
   );
 };
-export default CreateAcademicDepartment;
+export default CreateCourse;

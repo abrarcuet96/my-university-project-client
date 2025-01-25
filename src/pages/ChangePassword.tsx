@@ -1,26 +1,19 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Button, Row } from "antd";
-import { FieldValues } from "react-hook-form";
+import { FieldValues, SubmitHandler } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import AHFrom from "../components/form/AHForm";
 import AHInput from "../components/form/AHInput";
-import { useLoginMutation } from "../redux/features/auth/authApi";
-import { setUser, TUser } from "../redux/features/auth/authSlice";
+import { useChangePasswordMutation } from "../redux/features/admin/userManagment.api";
+import { logout } from "../redux/features/auth/authSlice";
 import { useAppDispatch } from "../redux/hooks";
-import { verifyToken } from "../utils/verifyToken";
-
-const Login = () => {
-  const navigate = useNavigate();
+import { TResponse } from "../types";
+const ChangePassword = () => {
+  const [changePassword] = useChangePasswordMutation();
   const dispatch = useAppDispatch();
-  const defaultValues = {
-    id: "2025010002",
-    password: "stu123",
-  };
-  const [login] = useLoginMutation();
-
-  const onSubmit = async (data: FieldValues) => {
-    const toastId = toast.loading("Logging in ...", {
+  const navigate = useNavigate();
+  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+    const toastId = toast.loading("Changing Password...", {
       style: {
         padding: "16px",
         borderRadius: "8px",
@@ -31,19 +24,35 @@ const Login = () => {
     });
 
     try {
-      const userInfo = {
-        id: data.id,
-        password: data.password,
-      };
-      const res = await login(userInfo).unwrap();
-      console.log(res);
-
-      const user = verifyToken(res.data.accessToken) as TUser;
-
-      dispatch(setUser({ user: user, token: res.data.accessToken }));
-      toast.success("Logged in successfully!", {
+      const res = (await changePassword(data)) as TResponse<any>;
+      if (res?.data?.success) {
+        dispatch(logout());
+        navigate("/login");
+        toast.success("Password is changed successfully", {
+          id: toastId,
+          style: {
+            padding: "16px",
+            borderRadius: "8px",
+            fontSize: "16px",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+          },
+          className: "class",
+        });
+      } else {
+        toast.error("Sorry! Can't change password", {
+          id: toastId,
+          style: {
+            padding: "16px",
+            borderRadius: "8px",
+            fontSize: "16px",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+          },
+          className: "class",
+        });
+      }
+    } catch (error) {
+      toast.error("Something went wrong", {
         id: toastId,
-        duration: 2000,
         style: {
           padding: "16px",
           borderRadius: "8px",
@@ -51,16 +60,6 @@ const Login = () => {
           boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
         },
         className: "class",
-      });
-      if (res?.data?.needsPasswordChange === true) {
-        navigate(`/change-password`);
-      } else {
-        navigate(`/${user.userRole}/dashboard`);
-      }
-    } catch (error) {
-      toast.error(`Something went wrong`, {
-        id: toastId,
-        duration: 2000,
       });
     }
   };
@@ -83,9 +82,9 @@ const Login = () => {
         }}
       >
         <h2 style={{ textAlign: "center", marginBottom: "1.5rem" }}>Login</h2>
-        <AHFrom onSubmit={onSubmit} defaultValues={defaultValues}>
-          <AHInput type="text" name="id" label="ID:" />
-          <AHInput type="password" name="password" label="Password:" />
+        <AHFrom onSubmit={onSubmit}>
+          <AHInput type="text" name="oldPassword" label="Old Password:" />
+          <AHInput type="password" name="newPassword" label="New Password:" />
           <Button
             htmlType="submit"
             type="primary"
@@ -106,4 +105,4 @@ const Login = () => {
     </Row>
   );
 };
-export default Login;
+export default ChangePassword;

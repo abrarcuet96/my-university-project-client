@@ -5,8 +5,9 @@ type TInputProps = {
   type: string;
   name: string;
   label?: string;
+  disabled?: boolean;
 };
-const AHInput = ({ type, name, label }: TInputProps) => {
+const AHInput = ({ type, name, label, disabled }: TInputProps) => {
   return (
     <div>
       <Controller
@@ -14,7 +15,13 @@ const AHInput = ({ type, name, label }: TInputProps) => {
         render={({ field }) => (
           <Form.Item label={label}>
             {" "}
-            <Input {...field} type={type} id={name} size="large" />
+            <Input
+              {...field}
+              type={type}
+              id={name}
+              size="large"
+              disabled={disabled}
+            />
           </Form.Item>
         )}
       />
